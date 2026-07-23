@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "typescript": "recommended",
+    "import": "recommended",
+    "unicorn": "recommended"
+  }
+}

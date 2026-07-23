@@ -1,0 +1,27 @@
+{
+  "name": "obsidian-brain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP memory layer for AI agents using Obsidian vaults",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "lint": "oxlint -c .oxlintrc.json",
+    "lint:fix": "oxlint -c .oxlintrc.json --fix",
+    "fmt": "oxfmt --write 'src/**/*.ts' 'tests/**/*.ts' --no-error-on-unmatched-pattern",
+    "fmt:check": "oxfmt --check 'src/**/*.ts' 'tests/**/*.ts' --no-error-on-unmatched-pattern",
+    "typecheck": "tsc --noEmit",
+    "validate": "bun run typecheck && bun run lint && bun test"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "oxlint": "^1.0.0",
+    "oxfmt": "^0.47.0",
+    "typescript": "^5.5.0"
+  }
+}
