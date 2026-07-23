@@ -66,7 +66,6 @@ describe("runDream", () => {
   it("retires unconfirmed preference when expired", async () => {
     // Create an old unconfirmed preference directly
     await writePreference(
-      "old-rule",
       {
         id: "pref-old-rule",
         status: "unconfirmed",
@@ -115,7 +114,6 @@ describe("runDream", () => {
   it("retires stale confirmed preference with no recent evidence", async () => {
     // Create a confirmed preference from 2020
     const prefPath = await writePreference(
-      "stale-confirmed",
       {
         id: "pref-stale-confirmed",
         status: "confirmed",

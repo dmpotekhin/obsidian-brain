@@ -19,7 +19,6 @@ afterAll(() => {
 describe("regenerateActive", () => {
   it("generates active.md from confirmed and quarantined preferences", async () => {
     await writePreference(
-      "rule-1",
       {
         id: "pref-rule-1", status: "confirmed",
         created: "2026-07-01T00:00:00Z", updated: "2026-07-01T00:00:00Z",
@@ -29,7 +28,6 @@ describe("regenerateActive", () => {
       "# Rule 1\n\nDo not use tabs.",
     );
     await writePreference(
-      "rule-2",
       {
         id: "pref-rule-2", status: "unconfirmed",
         created: "2026-07-01T00:00:00Z", updated: "2026-07-01T00:00:00Z",
@@ -39,7 +37,6 @@ describe("regenerateActive", () => {
       "# Rule 2\n\nUse spaces.",
     );
     await writePreference(
-      "rule-3",
       {
         id: "pref-rule-3", status: "quarantine",
         created: "2026-07-01T00:00:00Z", updated: "2026-07-01T00:00:00Z",

@@ -23,7 +23,6 @@ afterAll(() => {
 describe("writePreference", () => {
   it("creates preference file with correct frontmatter", async () => {
     const path = await writePreference(
-      "no-abbrev",
       {
         id: "pref-no-abbrev",
         status: "unconfirmed",
@@ -51,7 +50,6 @@ describe("writePreference", () => {
 describe("parsePreference", () => {
   it("reads preference data and body", async () => {
     const writePath = await writePreference(
-      "test-pref",
       {
         id: "pref-no-abbrev",
         status: "unconfirmed",
@@ -78,7 +76,6 @@ describe("moveToRetired", () => {
   it("moves preference to retired with reason", async () => {
     // Write a pref to retire
     await writePreference(
-      "stale-rule",
       {
         id: "pref-stale-rule",
         status: "confirmed",

@@ -9,6 +9,28 @@ import { regenerateActive } from "./active";
 import { appendLogEvent } from "./log";
 import { collectEvidenceForSlug } from "./evidence";
 
+/**
+ * Check if a preference has been marked as outdated (superseded) in the log files.
+ * Returns true if any log entry has result=outdated for this preference.
+ */
+function checkSuperseded(prefId: string): boolean {
+  const logDir = join(brainDir(), "log");
+  const files = listDir(logDir).filter((f) => f.endsWith(".md"));
+  for (const file of files) {
+    const logPath = join(logDir, file);
+    try {
+      const { readFileSync } = require("node:fs");
+      const content = readFileSync(logPath, "utf-8");
+      if (content.includes(`pref_id=${prefId}`) && content.includes("result=outdated")) {
+        return true;
+      }
+    } catch {
+      // skip
+    }
+  }
+  return false;
+}
+
 interface SignalRecord {
   id: string;
   slug: string;
@@ -136,7 +158,6 @@ export async function runDream(dryRun = false): Promise<DreamResult> {
       if (group.length >= config.candidateThreshold) {
         if (!dryRun) {
           await writePreference(
-            slug,
             {
               id: `pref-${slug}`,
               status: "unconfirmed",
@@ -157,7 +178,7 @@ export async function runDream(dryRun = false): Promise<DreamResult> {
     }
   }
 
-  // Phase 6: Retire — check unconfirmed expiry and confirmed staleness
+  // Phase 6: Retire, quarantine, and supersede checks
   for (const [slug, existing] of existingPrefs) {
     if (existing.status === "unconfirmed") {
       try {
@@ -176,6 +197,18 @@ export async function runDream(dryRun = false): Promise<DreamResult> {
       }
     } else if (existing.status === "confirmed") {
       const evidence = collectEvidenceForSlug(`pref-${slug}`);
+
+      // Check for supersede (outdated) evidence in log files
+      const superseeded = checkSuperseded(`pref-${slug}`);
+      if (superseeded && !existing.pinned) {
+        if (!dryRun) {
+          await moveToRetired(`pref-${slug}`, "superseded");
+        }
+        retired++;
+        continue;
+      }
+
+      // Check staleness
       if (evidence.lastEvidenceAt) {
         const lastDate = new Date(evidence.lastEvidenceAt);
         const daysSinceEvidence =
@@ -185,7 +218,36 @@ export async function runDream(dryRun = false): Promise<DreamResult> {
             await moveToRetired(`pref-${slug}`, "stale-no-evidence");
           }
           retired++;
+          continue;
         }
+      }
+
+      // Quarantine rule: confirmed + violated >= applied AND applied > lowMaxApplied → quarantine
+      if (
+        evidence.violated >= evidence.applied &&
+        evidence.applied > config.lowMaxApplied &&
+        !existing.pinned
+      ) {
+        if (!dryRun) {
+          const pref = await parsePreference(existing.path);
+          pref.status = "quarantine";
+          pref.updated = timestamp;
+          await writePreference(pref, pref.body);
+        }
+        quarantineChanges++;
+      }
+    } else if (existing.status === "quarantine") {
+      const evidence = collectEvidenceForSlug(`pref-${slug}`);
+
+      // Quarantine-recover: applied > violated → back to confirmed
+      if (evidence.applied > evidence.violated && !existing.pinned) {
+        if (!dryRun) {
+          const pref = await parsePreference(existing.path);
+          pref.status = "confirmed";
+          pref.updated = timestamp;
+          await writePreference(pref, pref.body);
+        }
+        quarantineChanges++;
       }
     }
   }

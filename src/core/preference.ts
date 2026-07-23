@@ -17,7 +17,6 @@ export interface PreferenceData {
 }
 
 export async function writePreference(
-  slug: string,
   data: PreferenceData,
   body: string,
 ): Promise<string> {

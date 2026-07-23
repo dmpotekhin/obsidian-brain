@@ -13,7 +13,6 @@ beforeAll(async () => {
   mkdirSync(join(TEST_VAULT, "Brain", "preferences"), { recursive: true });
 
   await writePreference(
-    "rule-1",
     {
       id: "pref-rule-1", status: "confirmed",
       created: "2026-07-01T00:00:00Z", updated: "2026-07-01T00:00:00Z",

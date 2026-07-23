@@ -1,8 +1,10 @@
 import { writeSignal } from "../../core/signal";
-import { parsePreference, writePreference } from "../../core/preference";
+import { parsePreference, writePreference, moveToRetired } from "../../core/preference";
 import { appendLogEvent } from "../../core/log";
-import { join } from "node:path";
-import { brainDir } from "../../core/vault";
+import { join, resolve, relative, normalize } from "node:path";
+import { brainDir, atomicWrite, fileExists, vaultRoot } from "../../core/vault";
+import { writeFrontmatter } from "../../core/frontmatter";
+import { mkdirSync } from "node:fs";
 
 export async function handleBrainFeedback(
   args: Record<string, unknown>,
@@ -50,6 +52,25 @@ export async function handleBrainApplyEvidence(
 
   const timestamp = new Date().toISOString().replace(/\.\d{3}/, "");
 
+  // Handle outdated — immediately retire with reason "superseded"
+  if (result === "outdated") {
+    await moveToRetired(prefId, "superseded");
+
+    await appendLogEvent({
+      kind: "apply-evidence",
+      timestamp,
+      pref_id: prefId,
+      result,
+      context: context || undefined,
+      new_status: "retired",
+    });
+
+    return {
+      evidence_id: `ev-${timestamp.replace(/[-:]/g, "")}`,
+      new_status: "retired",
+    };
+  }
+
   // Read current preference
   const prefPath = join(brainDir(), "preferences", `${prefId}.md`);
   const pref = await parsePreference(prefPath);
@@ -60,18 +81,37 @@ export async function handleBrainApplyEvidence(
     pref.applied_count++;
     if (pref.status === "unconfirmed") {
       newStatus = "confirmed";
+    } else if (pref.status === "quarantine" && pref.applied_count > pref.violated_count) {
+      // Quarantine-recover: quarantine + applied > violated → confirmed
+      newStatus = "confirmed";
     }
   } else if (result === "violated") {
     pref.violated_count++;
-  } else if (result === "outdated") {
-    // Outdated triggers retirement in next dream, but record now
+    if (pref.status === "quarantine") {
+      // Quarantine-escalate: quarantine + one more violated → retired
+      await moveToRetired(prefId, "quarantine-violated");
+
+      await appendLogEvent({
+        kind: "apply-evidence",
+        timestamp,
+        pref_id: prefId,
+        result,
+        context: context || undefined,
+        new_status: "retired",
+      });
+
+      return {
+        evidence_id: `ev-${timestamp.replace(/[-:]/g, "")}`,
+        new_status: "retired",
+      };
+    }
   }
 
   pref.updated = timestamp;
   pref.status = newStatus;
   pref.evidence_count = pref.applied_count + pref.violated_count;
 
-  await writePreference(pref.id.replace("pref-", ""), pref, pref.body);
+  await writePreference(pref, pref.body);
 
   await appendLogEvent({
     kind: "apply-evidence",
@@ -85,5 +125,58 @@ export async function handleBrainApplyEvidence(
   return {
     evidence_id: `ev-${timestamp.replace(/[-:]/g, "")}`,
     new_status: newStatus,
+  };
+}
+
+export async function handleBrainCreateNote(
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  const relPath = args["path"] as string;
+  const frontmatter = (args["frontmatter"] as Record<string, unknown>) ?? {};
+  const content = (args["content"] as string) ?? "";
+
+  if (!relPath || typeof relPath !== "string") {
+    throw new Error("path is required and must be a string");
+  }
+
+  // Security: refuse traversal attempts
+  const normalized = normalize(relPath);
+  if (normalized.includes("..")) {
+    throw new Error(`Path traversal denied: ${relPath}`);
+  }
+
+  // Security: refuse absolute paths
+  if (relPath.startsWith("/")) {
+    throw new Error(`Absolute paths not allowed: ${relPath}`);
+  }
+
+  // Require .md extension
+  if (!relPath.endsWith(".md")) {
+    throw new Error("File path must end with .md");
+  }
+
+  // Construct the full target path under Brain/notes/
+  const notesDir = join(brainDir(), "notes");
+  const targetPath = resolve(notesDir, normalized);
+
+  // Verify the resolved path is still inside Brain/notes/
+  const rel = relative(notesDir, targetPath);
+  if (rel.startsWith("..") || rel === "") {
+    throw new Error(`Path outside notes directory: ${relPath}`);
+  }
+
+  // Security: refuse clobbering existing files
+  if (fileExists(targetPath)) {
+    throw new Error(`File already exists: ${relPath}`);
+  }
+
+  // Create the note
+  const body = writeFrontmatter(frontmatter, content);
+  mkdirSync(targetPath.substring(0, targetPath.lastIndexOf("/")), { recursive: true });
+  await atomicWrite(targetPath, body);
+
+  return {
+    path: targetPath,
+    relative_path: join("Brain/notes", normalized),
   };
 }

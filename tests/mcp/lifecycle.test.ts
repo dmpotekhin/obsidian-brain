@@ -45,7 +45,7 @@ describe("handleBrainDream", () => {
 
 describe("handleBrainApplyEvidence", () => {
   it("records applied evidence and promotes to confirmed", async () => {
-    await writePreference("test-apply", {
+    await writePreference({
       id: "pref-test-apply",
       status: "unconfirmed",
       created: "2026-07-23T00:00:00Z",
