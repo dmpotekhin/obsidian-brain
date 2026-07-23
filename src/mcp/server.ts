@@ -1,7 +1,7 @@
 import { createInterface } from "node:readline";
 import {
   PROTOCOL_VERSION, SERVER_NAME, SERVER_VERSION,
-  JSONRPC_VERSION, MCPError, INVALID_REQUEST, METHOD_NOT_FOUND,
+  JSONRPC_VERSION, MCPError, METHOD_NOT_FOUND,
   INTERNAL_ERROR, PARSE_ERROR,
 } from "./protocol";
 import { buildToolTable, type ToolDefinition } from "./tools";
@@ -79,7 +79,7 @@ export class MCPServer {
   }
 
   private handleToolsList(req: JsonRpcRequest): unknown {
-    const tools = [...this.tools.values()].map(t => ({
+    const tools = Array.from(this.tools.values()).map(t => ({
       name: t.name,
       description: t.description,
       inputSchema: t.inputSchema,
