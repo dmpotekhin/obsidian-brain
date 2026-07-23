@@ -4,6 +4,7 @@ import { handleBrainContext, handleBrainContextPack } from "./tools/reader";
 import { handleBrainSearch } from "./tools/search";
 import { handleBrainStatus, handleBrainAudit, handleBrainRollback } from "./tools/admin";
 import { handleBrainHealth, handleBrainHygiene } from "./tools/health";
+import { handleBrainObligation } from "./tools/obligations";
 
 export interface ToolDefinition {
   name: string;
@@ -174,6 +175,39 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: [],
     },
     handler: handleBrainHygiene,
+  });
+
+  tools.set("brain_obligation", {
+    name: "brain_obligation",
+    description: "Manage recurring obligations (tasks with cadences). Operations: add, done, list, show, remove.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        operation: {
+          type: "string",
+          enum: ["add", "done", "list", "show", "remove"],
+          description: "Operation to perform",
+        },
+        title: {
+          type: "string",
+          description: "Title of the obligation (required for add)",
+        },
+        cadence: {
+          type: "string",
+          description: "Recurrence cadence: daily, weekly, biweekly, monthly, quarterly, yearly, or every-N-days (required for add)",
+        },
+        kind: {
+          type: "string",
+          description: "Category of the obligation (default: task)",
+        },
+        slug: {
+          type: "string",
+          description: "Obligation slug (required for done, show, remove)",
+        },
+      },
+      required: ["operation"],
+    },
+    handler: handleBrainObligation,
   });
 
   return tools;
