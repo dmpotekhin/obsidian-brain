@@ -1,4 +1,8 @@
 import { writeSignal } from "../../core/signal";
+import { parsePreference, writePreference } from "../../core/preference";
+import { appendLogEvent } from "../../core/log";
+import { join } from "node:path";
+import { brainDir } from "../../core/vault";
 
 export async function handleBrainFeedback(
   args: Record<string, unknown>,
@@ -26,5 +30,60 @@ export async function handleBrainFeedback(
   return {
     signal_path: result.path,
     signal_id: result.id,
+  };
+}
+
+export async function handleBrainApplyEvidence(
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  const prefId = args["pref_id"] as string;
+  const result = args["result"] as "applied" | "violated" | "outdated";
+  const context = (args["context"] as string) ?? "";
+
+  if (!prefId || !result) {
+    throw new Error("pref_id and result are required");
+  }
+
+  if (!["applied", "violated", "outdated"].includes(result)) {
+    throw new Error(`Invalid result: ${result}`);
+  }
+
+  const timestamp = new Date().toISOString().replace(/\.\d{3}/, "");
+
+  // Read current preference
+  const prefPath = join(brainDir(), "preferences", `${prefId}.md`);
+  const pref = await parsePreference(prefPath);
+
+  // Update counters
+  let newStatus = pref.status;
+  if (result === "applied") {
+    pref.applied_count++;
+    if (pref.status === "unconfirmed") {
+      newStatus = "confirmed";
+    }
+  } else if (result === "violated") {
+    pref.violated_count++;
+  } else if (result === "outdated") {
+    // Outdated triggers retirement in next dream, but record now
+  }
+
+  pref.updated = timestamp;
+  pref.status = newStatus;
+  pref.evidence_count = pref.applied_count + pref.violated_count;
+
+  await writePreference(pref.id.replace("pref-", ""), pref, pref.body);
+
+  await appendLogEvent({
+    kind: "apply-evidence",
+    timestamp,
+    pref_id: prefId,
+    result,
+    context: context || undefined,
+    new_status: newStatus,
+  });
+
+  return {
+    evidence_id: `ev-${timestamp.replace(/[-:]/g, "")}`,
+    new_status: newStatus,
   };
 }

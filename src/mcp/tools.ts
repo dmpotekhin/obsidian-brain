@@ -1,4 +1,5 @@
-import { handleBrainFeedback } from "./tools/writer";
+import { handleBrainFeedback, handleBrainApplyEvidence } from "./tools/writer";
+import { handleBrainDream } from "./tools/lifecycle";
 
 export interface ToolDefinition {
   name: string;
@@ -46,6 +47,34 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: ["topic", "sign", "principle", "agent"],
     },
     handler: handleBrainFeedback,
+  });
+
+  tools.set("brain_apply_evidence", {
+    name: "brain_apply_evidence",
+    description: "Record whether a preference was applied or violated during work.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        pref_id: { type: "string", description: "Preference ID (e.g., pref-no-abbrev)" },
+        result: { type: "string", enum: ["applied", "violated", "outdated"] },
+        context: { type: "string", description: "Optional context about the decision" },
+      },
+      required: ["pref_id", "result"],
+    },
+    handler: handleBrainApplyEvidence,
+  });
+
+  tools.set("brain_dream", {
+    name: "brain_dream",
+    description: "Run the deterministic rule engine. Processes signals into preferences, retires obsolete ones. Idempotent.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        dry_run: { type: "boolean", description: "Preview changes without writing" },
+      },
+      required: [],
+    },
+    handler: handleBrainDream,
   });
 
   return tools;
