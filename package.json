@@ -18,12 +18,10 @@
     "o2b": "./src/cli.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^11.0.0",
     "gray-matter": "^4.0.3"
   },
   "devDependencies": {
     "@types/bun": "^1.1.0",
-    "@types/better-sqlite3": "^7.6.0",
     "oxlint": "^1.0.0",
     "oxfmt": "^0.47.0",
     "typescript": "^5.5.0"

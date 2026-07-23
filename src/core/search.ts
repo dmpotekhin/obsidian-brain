@@ -1,7 +1,7 @@
 import { Database } from "bun:sqlite";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { brainDir, fileExists, listDir } from "./vault";
+import { brainDir, fileExists, listDir, vaultRoot } from "./vault";
 import { parseFrontmatter } from "./frontmatter";
 
 export interface SearchResult {
@@ -16,8 +16,8 @@ export class SearchIndex {
   private indexPath: string;
 
   constructor() {
-    const vaultRoot = process.env["BRAIN_VAULT"] ?? "";
-    const dotBrain = join(vaultRoot, ".brain");
+    const root = vaultRoot();
+    const dotBrain = join(root, ".brain");
     this.indexPath = join(dotBrain, "index.sqlite");
   }
 
