@@ -15,7 +15,7 @@
     "validate": "bun run typecheck && bun run lint && bun test"
   },
   "bin": {
-    "o2b": "./src/mcp/server.ts"
+    "o2b": "./src/cli.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",
