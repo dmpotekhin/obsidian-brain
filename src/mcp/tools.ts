@@ -1,4 +1,4 @@
-import { handleBrainFeedback, handleBrainApplyEvidence } from "./tools/writer";
+import { handleBrainFeedback, handleBrainApplyEvidence, handleBrainCreateNote } from "./tools/writer";
 import { handleBrainDream } from "./tools/lifecycle";
 import { handleBrainContext, handleBrainContextPack } from "./tools/reader";
 import { handleBrainSearch } from "./tools/search";
@@ -208,6 +208,30 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: ["operation"],
     },
     handler: handleBrainObligation,
+  });
+
+  tools.set("brain_create_note", {
+    name: "brain_create_note",
+    description: "Create a markdown note in Brain/notes/ with frontmatter and content. Refuses traversal, root paths, and clobbering.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        path: {
+          type: "string",
+          description: "Relative path within Brain/notes/ (must end with .md)",
+        },
+        frontmatter: {
+          type: "object",
+          description: "Optional frontmatter key-value pairs",
+        },
+        content: {
+          type: "string",
+          description: "Markdown body content for the note",
+        },
+      },
+      required: ["path"],
+    },
+    handler: handleBrainCreateNote,
   });
 
   return tools;
