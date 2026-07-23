@@ -110,5 +110,14 @@ export async function handleBrainRollback(
   const latestSnapshot = snapshots[0]!;
   await restoreSnapshot(latestSnapshot);
 
-  return { rollback_id: latestSnapshot };
+  // Collect restored files list from the Brain directory
+  const restoredFiles = listDir(brainDir())
+    .filter((f) => !f.startsWith("."))
+    .map((f) => join(brainDir(), f));
+
+  return {
+    rollback_id: latestSnapshot,
+    restored_files: restoredFiles,
+    run_id: latestSnapshot,
+  };
 }
