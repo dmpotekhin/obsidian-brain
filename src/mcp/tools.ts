@@ -2,6 +2,7 @@ import { handleBrainFeedback, handleBrainApplyEvidence } from "./tools/writer";
 import { handleBrainDream } from "./tools/lifecycle";
 import { handleBrainContext, handleBrainContextPack } from "./tools/reader";
 import { handleBrainSearch } from "./tools/search";
+import { handleBrainStatus } from "./tools/admin";
 
 export interface ToolDefinition {
   name: string;
@@ -111,6 +112,17 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: ["query"],
     },
     handler: handleBrainSearch,
+  });
+
+  tools.set("brain_status", {
+    name: "brain_status",
+    description: "Show vault status: path, config, preferences/signals count, last dream.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+    handler: handleBrainStatus,
   });
 
   return tools;
