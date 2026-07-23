@@ -1,5 +1,7 @@
 import { handleBrainFeedback, handleBrainApplyEvidence } from "./tools/writer";
 import { handleBrainDream } from "./tools/lifecycle";
+import { handleBrainContext, handleBrainContextPack } from "./tools/reader";
+import { handleBrainSearch } from "./tools/search";
 
 export interface ToolDefinition {
   name: string;
@@ -75,6 +77,40 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: [],
     },
     handler: handleBrainDream,
+  });
+
+  tools.set("brain_context", {
+    name: "brain_context",
+    description: "Read current active context — all confirmed and quarantined preferences.",
+    inputSchema: { type: "object", properties: {}, required: [] },
+    handler: handleBrainContext,
+  });
+
+  tools.set("brain_context_pack", {
+    name: "brain_context_pack",
+    description: "Budgeted context slice — packs preferences into token limit.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        max_tokens: { type: "number", description: "Maximum tokens for the packed context" },
+      },
+      required: ["max_tokens"],
+    },
+    handler: handleBrainContextPack,
+  });
+
+  tools.set("brain_search", {
+    name: "brain_search",
+    description: "Full-text search over vault using FTS5.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search query" },
+        limit: { type: "number", description: "Max results (default 20)" },
+      },
+      required: ["query"],
+    },
+    handler: handleBrainSearch,
   });
 
   return tools;
