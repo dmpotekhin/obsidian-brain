@@ -3,6 +3,7 @@ import { handleBrainDream } from "./tools/lifecycle";
 import { handleBrainContext, handleBrainContextPack } from "./tools/reader";
 import { handleBrainSearch } from "./tools/search";
 import { handleBrainStatus } from "./tools/admin";
+import { handleBrainHealth, handleBrainHygiene } from "./tools/health";
 
 export interface ToolDefinition {
   name: string;
@@ -123,6 +124,30 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: [],
     },
     handler: handleBrainStatus,
+  });
+
+  tools.set("brain_health", {
+    name: "brain_health",
+    description: "Health check: verdict (healthy/watch/unhealthy) and domain-level diagnostics (config, structure, duplicates).",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+    handler: handleBrainHealth,
+  });
+
+  tools.set("brain_hygiene", {
+    name: "brain_hygiene",
+    description: "Hygiene scan: find near-duplicate preferences and stale signals (>90 days in inbox).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        scan: { type: "boolean", description: "Run the scan (default true). Set false to skip." },
+      },
+      required: [],
+    },
+    handler: handleBrainHygiene,
   });
 
   return tools;
