@@ -53,3 +53,86 @@ describe("handleBrainStatus", () => {
     expect(config).toHaveProperty("stale_evidence_days");
   });
 });
+
+// --- Tests for handleBrainAudit ---
+
+describe("handleBrainAudit", () => {
+  let handleBrainAudit: (args: Record<string, unknown>) => Promise<unknown>;
+
+  beforeAll(async () => {
+    // Dynamic import to avoid module-caching issues
+    const mod = await import("../../src/mcp/tools/admin");
+    handleBrainAudit = mod.handleBrainAudit;
+  });
+
+  it("returns an empty array when no log events match the pref_id", async () => {
+    const result = (await handleBrainAudit({ pref_id: "pref-nonexistent" })) as Record<string, unknown>;
+    expect(result).toHaveProperty("pref_id");
+    expect(result.pref_id).toBe("pref-nonexistent");
+    expect(result).toHaveProperty("events");
+    const events = result.events as unknown[];
+    expect(events.length).toBe(0);
+  });
+
+  it("finds events matching a pref_id from log files", async () => {
+    // Write a log entry with pref_id
+    writeFileSync(
+      join(TEST_VAULT, "Brain", "log", "2026-07-23.md"),
+      `---
+date: 2026-07-23
+events_count: 2
+---
+
+## Events
+
+- **14:30:22** | apply-evidence | pref_id=pref-no-yelling | result=applied | new_status=confirmed
+- **15:00:00** | apply-evidence | pref_id=pref-be-concise | result=violated | new_status=confirmed
+`,
+    );
+
+    const result = (await handleBrainAudit({ pref_id: "pref-no-yelling" })) as Record<string, unknown>;
+    const events = result.events as Array<Record<string, unknown>>;
+    expect(events.length).toBe(1);
+    expect(events[0]).toHaveProperty("kind");
+    expect(events[0]!.pref_id).toBe("pref-no-yelling");
+    expect(events[0]!.result).toBe("applied");
+  });
+
+  it("returns multiple events if the same pref_id appears in multiple log files", async () => {
+    writeFileSync(
+      join(TEST_VAULT, "Brain", "log", "2026-07-24.md"),
+      `---
+date: 2026-07-24
+events_count: 1
+---
+
+## Events
+
+- **12:00:00** | apply-evidence | pref_id=pref-no-yelling | result=violated | new_status=confirmed
+`,
+    );
+
+    const result = (await handleBrainAudit({ pref_id: "pref-no-yelling" })) as Record<string, unknown>;
+    const events = result.events as Array<Record<string, unknown>>;
+    expect(events.length).toBe(2);
+  });
+
+  it("throws when pref_id is missing", async () => {
+    await expect(handleBrainAudit({})).rejects.toThrow("pref_id is required");
+  });
+});
+
+// --- Tests for handleBrainRollback ---
+
+describe("handleBrainRollback", () => {
+  let handleBrainRollback: (args: Record<string, unknown>) => Promise<unknown>;
+
+  beforeAll(async () => {
+    const mod = await import("../../src/mcp/tools/admin");
+    handleBrainRollback = mod.handleBrainRollback;
+  });
+
+  it("throws when there are no snapshots to restore", async () => {
+    await expect(handleBrainRollback({})).rejects.toThrow("No snapshots found");
+  });
+});

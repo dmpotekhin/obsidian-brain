@@ -31,4 +31,22 @@ describe("buildToolTable", () => {
     expect(feedback!.inputSchema.required).toContain("principle");
     expect(feedback!.inputSchema.required).toContain("agent");
   });
+
+  it("registers brain_audit with pref_id required parameter", () => {
+    const tools = buildToolTable();
+    const audit = tools.get("brain_audit");
+    expect(audit).toBeDefined();
+    expect(audit!.name).toBe("brain_audit");
+    expect(audit!.inputSchema.required).toContain("pref_id");
+    expect(audit!.inputSchema.properties).toHaveProperty("pref_id");
+  });
+
+  it("registers brain_rollback with optional force parameter", () => {
+    const tools = buildToolTable();
+    const rollback = tools.get("brain_rollback");
+    expect(rollback).toBeDefined();
+    expect(rollback!.name).toBe("brain_rollback");
+    expect(rollback!.inputSchema.required).toEqual([]);
+    expect(rollback!.inputSchema.properties).toHaveProperty("force");
+  });
 });

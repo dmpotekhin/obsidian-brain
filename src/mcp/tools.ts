@@ -2,7 +2,7 @@ import { handleBrainFeedback, handleBrainApplyEvidence } from "./tools/writer";
 import { handleBrainDream } from "./tools/lifecycle";
 import { handleBrainContext, handleBrainContextPack } from "./tools/reader";
 import { handleBrainSearch } from "./tools/search";
-import { handleBrainStatus } from "./tools/admin";
+import { handleBrainStatus, handleBrainAudit, handleBrainRollback } from "./tools/admin";
 import { handleBrainHealth, handleBrainHygiene } from "./tools/health";
 
 export interface ToolDefinition {
@@ -124,6 +124,32 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: [],
     },
     handler: handleBrainStatus,
+  });
+
+  tools.set("brain_audit", {
+    name: "brain_audit",
+    description: "Read log files for events matching a preference ID. Returns full mutation history.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        pref_id: { type: "string", description: "Preference ID to audit (e.g., pref-no-yelling)" },
+      },
+      required: ["pref_id"],
+    },
+    handler: handleBrainAudit,
+  });
+
+  tools.set("brain_rollback", {
+    name: "brain_rollback",
+    description: "Restore the most recent snapshot. Returns the rollback_id of the restored snapshot.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        force: { type: "boolean", description: "Force rollback (unused — always restores latest)" },
+      },
+      required: [],
+    },
+    handler: handleBrainRollback,
   });
 
   tools.set("brain_health", {
