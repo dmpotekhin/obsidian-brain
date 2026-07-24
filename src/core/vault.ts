@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, renameSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, relative } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -47,13 +47,10 @@ export async function atomicWrite(filePath: string, content: string): Promise<vo
   mkdirSync(dir, { recursive: true });
   const tmpFile = join(tmpdir(), `brain-${randomUUID()}.tmp`);
   writeFileSync(tmpFile, content, "utf-8");
-  // Atomic rename within same filesystem
-  const { renameSync } = await import("node:fs");
   renameSync(tmpFile, target);
 }
 
 export async function readFile(filePath: string): Promise<string> {
-  const { readFileSync } = await import("node:fs");
   return readFileSync(filePath, "utf-8");
 }
 

@@ -39,10 +39,10 @@ export function collectEvidenceForSlug(slug: string): EvidenceResult {
   return { applied, violated, lastEvidenceAt };
 }
 
-function buildTimestamp(date: string, line: string): string | null {
-  const match = line.match(/\*\*(\d{2}:\d{2}:\d{2})\*\*/);
+function buildTimestamp(_date: string, line: string): string | null {
+  const match = line.match(/\*\*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?)\*\*/);
   if (!match) return null;
-  return `${date}T${match[1]}Z`;
+  return match[1]!;
 }
 
 export function countApplied(slug: string): number {

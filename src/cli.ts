@@ -124,7 +124,9 @@ function cmdInit(args: string[]): void {
     process.exit(1);
   }
 
-  const resolved = join(process.cwd(), vaultPath);
+  const resolved = vaultPath.startsWith("/") || vaultPath.startsWith("~")
+    ? join(vaultPath.replace(/^~/, process.env["HOME"] ?? "/Users"))
+    : join(process.cwd(), vaultPath);
   const brainRoot = join(resolved, "Brain");
 
   if (existsSync(brainRoot)) {

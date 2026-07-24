@@ -8,7 +8,7 @@ export interface BrainLogEntry {
 }
 
 function formatEvent(entry: BrainLogEntry): string {
-  const parts = [`**${entry.timestamp.slice(11, 19)}** | ${entry.kind}`];
+  const parts = [`**${entry.timestamp}** | ${entry.kind}`];
   for (const [key, value] of Object.entries(entry)) {
     if (key === "kind" || key === "timestamp") continue;
     parts.push(`${key}=${value}`);
@@ -17,7 +17,7 @@ function formatEvent(entry: BrainLogEntry): string {
 }
 
 export async function appendLogEvent(entry: BrainLogEntry): Promise<string> {
-  const date = entry.timestamp.slice(0, 10);
+  const date = new Date().toISOString().slice(0, 10);
   const logDir = join(brainDir(), "log");
   const logPath = join(logDir, `${date}.md`);
   const line = formatEvent(entry);
@@ -27,7 +27,15 @@ export async function appendLogEvent(entry: BrainLogEntry): Promise<string> {
     const updated = existing.trimEnd() + "\n" + line + "\n";
     await atomicWrite(logPath, updated);
   } else {
-    const header = `---\ndate: ${date}\nevents_count: 1\n---\n\n## Events\n\n${line}\n`;
+    const header = `---
+date: ${date}
+events_count: 1
+---
+
+## Events
+
+${line}
+`;
     await atomicWrite(logPath, header);
   }
 

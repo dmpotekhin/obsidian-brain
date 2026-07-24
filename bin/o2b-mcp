@@ -1,0 +1,4 @@
+#!/bin/bash
+export PATH="$HOME/.bun/bin:$PATH"
+export BRAIN_VAULT="/Users/dmitrypotekhin/Odsidian/obsidians/Obsidian Vault"
+exec bun run /Users/dmitrypotekhin/brain/src/cli.ts mcp
