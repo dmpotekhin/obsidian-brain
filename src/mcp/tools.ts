@@ -1,4 +1,4 @@
-import { handleBrainFeedback, handleBrainApplyEvidence, handleBrainCreateNote } from "./tools/writer";
+import { handleBrainFeedback, handleBrainApplyEvidence, handleBrainCreateNote, handleBrainDevlog } from "./tools/writer";
 import { handleBrainDream } from "./tools/lifecycle";
 import { handleBrainContext, handleBrainContextPack } from "./tools/reader";
 import { handleBrainSearch } from "./tools/search";
@@ -232,6 +232,26 @@ export function buildToolTable(): Map<string, ToolDefinition> {
       required: ["path"],
     },
     handler: handleBrainCreateNote,
+  });
+
+  tools.set("brain_devlog", {
+    name: "brain_devlog",
+    description: "Append a timestamped entry to the dev journal (Brain/journal/YYYY-MM-DD.md). Use during development sessions to log actions, decisions, and progress.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        entry: {
+          type: "string",
+          description: "The log entry text (one line describing the action or decision)",
+        },
+        project: {
+          type: "string",
+          description: "Optional project name for grouping (e.g., 'qa-trainer', 'brain')",
+        },
+      },
+      required: ["entry"],
+    },
+    handler: handleBrainDevlog,
   });
 
   return tools;

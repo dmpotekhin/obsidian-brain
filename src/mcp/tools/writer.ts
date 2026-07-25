@@ -4,7 +4,7 @@ import { appendLogEvent } from "../../core/log";
 import { join, resolve, relative, normalize } from "node:path";
 import { brainDir, atomicWrite, fileExists, vaultRoot } from "../../core/vault";
 import { writeFrontmatter } from "../../core/frontmatter";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 
 export async function handleBrainFeedback(
   args: Record<string, unknown>,
@@ -178,5 +178,44 @@ export async function handleBrainCreateNote(
   return {
     path: targetPath,
     relative_path: join("Brain/notes", normalized),
+  };
+}
+
+export async function handleBrainDevlog(
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  const entry = args["entry"] as string;
+  const project = (args["project"] as string) ?? "";
+
+  if (!entry || typeof entry !== "string" || entry.trim().length === 0) {
+    throw new Error("entry is required and must be a non-empty string");
+  }
+
+  // Build journal path: Brain/journal/YYYY-MM-DD.md
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10); // "2026-07-25"
+  const timeStr = now.toTimeString().slice(0, 5); // "14:05"
+
+  const journalDir = join(brainDir(), "journal");
+  const journalPath = join(journalDir, `${dateStr}.md`);
+
+  // Format the log line
+  const projectTag = project.trim() ? ` | project:${project.trim()}` : "";
+  const line = `${timeStr}${projectTag} | ${entry.trim()}\n`;
+
+  if (!fileExists(journalPath)) {
+    // Create new journal file with header
+    const header = `# Dev Journal — ${dateStr}\n\n`;
+    mkdirSync(journalDir, { recursive: true });
+    await atomicWrite(journalPath, header + line);
+  } else {
+    // Append to existing file
+    const existing = readFileSync(journalPath, "utf-8");
+    await atomicWrite(journalPath, existing + line);
+  }
+
+  return {
+    journal: `Brain/journal/${dateStr}.md`,
+    entry: `${timeStr}${projectTag} | ${entry.trim()}`,
   };
 }
