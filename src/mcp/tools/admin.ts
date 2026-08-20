@@ -18,7 +18,7 @@ export async function handleBrainStatus(): Promise<unknown> {
   const logFiles = fileExists(logDir)
     ? listDir(logDir)
         .filter((f) => f.endsWith(".md"))
-        .sort()
+        .toSorted()
     : [];
 
   return {
@@ -79,7 +79,7 @@ export async function handleBrainAudit(
 
   const logFiles = listDir(logDir)
     .filter((f) => f.endsWith(".md"))
-    .sort();
+    .toSorted();
 
   for (const logFile of logFiles) {
     const content = await readFile(join(logDir, logFile));
@@ -99,7 +99,7 @@ export async function handleBrainAudit(
 }
 
 export async function handleBrainRollback(
-  args: Record<string, unknown>,
+  _args: Record<string, unknown>,
 ): Promise<unknown> {
   const snapshots = listSnapshots();
 

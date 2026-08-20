@@ -7,8 +7,8 @@
   "scripts": {
     "start": "bun run src/mcp/server.ts",
     "test": "bun test",
-    "lint": "oxlint -c .oxlintrc.json",
-    "lint:fix": "oxlint -c .oxlintrc.json --fix",
+    "lint": "bun node_modules/oxlint/dist/cli.js -c .oxlintrc.json",
+    "lint:fix": "bun node_modules/oxlint/dist/cli.js -c .oxlintrc.json --fix",
     "fmt": "oxfmt --write 'src/**/*.ts' 'tests/**/*.ts' --no-error-on-unmatched-pattern",
     "fmt:check": "oxfmt --check 'src/**/*.ts' 'tests/**/*.ts' --no-error-on-unmatched-pattern",
     "typecheck": "tsc --noEmit",

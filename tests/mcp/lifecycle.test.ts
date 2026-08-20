@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
-import { mkdirSync, rmSync, existsSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { handleBrainDream } from "../../src/mcp/tools/lifecycle";
 import { handleBrainApplyEvidence } from "../../src/mcp/tools/writer";
-import { writePreference, parsePreference } from "../../src/core/preference";
+import { writePreference } from "../../src/core/preference";
 import { atomicWrite } from "../../src/core/vault";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");

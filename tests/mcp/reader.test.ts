@@ -3,7 +3,6 @@ import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { handleBrainContext, handleBrainContextPack } from "../../src/mcp/tools/reader";
 import { writePreference } from "../../src/core/preference";
-import { readFile } from "../../src/core/vault";
 import { regenerateActive } from "../../src/core/active";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");

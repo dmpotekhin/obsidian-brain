@@ -2,7 +2,7 @@ import { writeSignal } from "../../core/signal";
 import { parsePreference, writePreference, moveToRetired } from "../../core/preference";
 import { appendLogEvent } from "../../core/log";
 import { join, resolve, relative, normalize } from "node:path";
-import { brainDir, atomicWrite, fileExists, vaultRoot } from "../../core/vault";
+import { brainDir, atomicWrite, fileExists } from "../../core/vault";
 import { writeFrontmatter } from "../../core/frontmatter";
 import { extractEntities } from "../../core/entities";
 import { mkdirSync, readFileSync } from "node:fs";

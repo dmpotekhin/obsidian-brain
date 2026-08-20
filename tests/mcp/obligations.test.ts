@@ -2,8 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { handleBrainObligation } from "../../src/mcp/tools/obligations";
-import { readFile, listDir } from "../../src/core/vault";
-import { brainDir } from "../../src/core/vault";
+import { readFile } from "../../src/core/vault";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");
 

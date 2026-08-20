@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { mkdirSync, renameSync } from "node:fs";
-import { brainDir, listDir, readFile, fileExists } from "./vault";
+import { brainDir, listDir, readFile } from "./vault";
 import { parseFrontmatter } from "./frontmatter";
 import { loadConfig } from "./config";
 import { writePreference, parsePreference, moveToRetired } from "./preference";

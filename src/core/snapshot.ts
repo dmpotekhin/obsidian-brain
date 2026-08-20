@@ -74,8 +74,8 @@ export function listSnapshots(): string[] {
   return readdirSync(snapshotsDir)
     .filter(f => f.endsWith(".tar.zst"))
     .map(f => f.replace(".tar.zst", ""))
-    .sort()
-    .reverse();
+    .toSorted()
+    .toReversed();
 }
 
 export async function pruneSnapshots(maxSnapshots: number): Promise<void> {

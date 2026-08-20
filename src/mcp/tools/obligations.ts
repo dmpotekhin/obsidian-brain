@@ -44,11 +44,11 @@ function advanceDueDate(currentDue: string, cadence: string): string {
   } else {
     const match = cadence.match(EVERY_N_DAYS_RE);
     if (match) {
-      date.setDate(date.getDate() + parseInt(match[1], 10));
+      date.setDate(date.getDate() + parseInt(match[1] ?? "0", 10));
     }
   }
 
-  return date.toISOString().split("T")[0];
+  return date.toISOString().slice(0, 10);
 }
 
 function oblDir(): string {

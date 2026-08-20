@@ -3,14 +3,14 @@ import { tmpdir } from "node:os";
 import { join, resolve, relative } from "node:path";
 import { randomUUID } from "node:crypto";
 
-let _vaultRoot: string | null = null;
+let vaultRootCache: string | null = null;
 
 export function vaultRoot(): string {
-  if (_vaultRoot) return _vaultRoot;
+  if (vaultRootCache) return vaultRootCache;
   const env = process.env["BRAIN_VAULT"];
   if (env) {
-    _vaultRoot = resolve(env);
-    return _vaultRoot;
+    vaultRootCache = resolve(env);
+    return vaultRootCache;
   }
   const configPath = join(
     process.env["HOME"] ?? "~",
@@ -20,8 +20,8 @@ export function vaultRoot(): string {
     const raw = readFileSync(configPath, "utf-8");
     const match = raw.match(/vault_path:\s*(.+)/);
     if (match?.[1]) {
-      _vaultRoot = resolve(match[1].trim());
-      return _vaultRoot;
+      vaultRootCache = resolve(match[1].trim());
+      return vaultRootCache;
     }
   }
   throw new Error("BRAIN_VAULT not set and ~/.config/brain/config.yaml not found");

@@ -1,12 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
-import { mkdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import {
   brainDir,
   atomicWrite,
   ensureInsideVault,
   readFile,
-  fileExists,
   listDir,
 } from "../../src/core/vault";
 

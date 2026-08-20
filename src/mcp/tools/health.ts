@@ -46,7 +46,7 @@ export async function handleBrainHealth(): Promise<unknown> {
   const dups: HealthFinding[] = [];
   if (fileExists(prefsDir)) {
     const ids = new Set<string>();
-    for (const f of listDir(prefsDir).filter((f) => f.endsWith(".md"))) {
+    for (const f of listDir(prefsDir).filter((file) => file.endsWith(".md"))) {
       try {
         const pref = await parsePreference(join(prefsDir, f));
         if (ids.has(pref.id)) {
@@ -91,7 +91,7 @@ export async function handleBrainHygiene(
   const prefsDir = join(brainDir(), "preferences");
   if (fileExists(prefsDir)) {
     const titles: { path: string; title: string }[] = [];
-    for (const f of listDir(prefsDir).filter((f) => f.endsWith(".md"))) {
+    for (const f of listDir(prefsDir).filter((file) => file.endsWith(".md"))) {
       try {
         const pref = await parsePreference(join(prefsDir, f));
         titles.push({ path: f, title: pref.id });
@@ -122,7 +122,7 @@ export async function handleBrainHygiene(
   const inboxDir = join(brainDir(), "inbox");
   if (fileExists(inboxDir)) {
     const oldThreshold = Date.now() - 90 * 24 * 60 * 60 * 1000; // 90 days
-    for (const f of listDir(inboxDir).filter((f) => f.endsWith(".md"))) {
+    for (const f of listDir(inboxDir).filter((file) => file.endsWith(".md"))) {
       const dateMatch = f.match(/sig-(\d{4}-\d{2}-\d{2})/);
       if (dateMatch) {
         const sigDate = new Date(dateMatch[1]!).getTime();

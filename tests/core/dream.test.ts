@@ -55,7 +55,7 @@ describe("runDream", () => {
     await writeSignal("use-yarn", "positive", "Prefer yarn", "hermes");
     await writeSignal("use-yarn", "positive", "Yarn is faster", "claude");
 
-    const result = await runDream();
+    await runDream();
     // The 2 signals for use-yarn should NOT create a preference (below threshold of 3)
     // result.signals_processed counts all signals scanned
     const prefPath = join(brainDir(), "preferences", "pref-use-yarn.md");
