@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { handleBrainFeedback } from "../../src/mcp/tools/writer";
+import { handleBrainFeedback, handleBrainCreateNote } from "../../src/mcp/tools/writer";
 import { readFile } from "../../src/core/vault";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");
@@ -47,5 +47,36 @@ describe("handleBrainFeedback", () => {
     const r = result as { signal_path: string };
     const content = await readFile(r.signal_path);
     expect(content).toContain("scope: general");
+  });
+});
+
+describe("handleBrainCreateNote", () => {
+  it("auto-generates entities frontmatter from content", async () => {
+    const result = await handleBrainCreateNote({
+      path: "projects/trainer.md",
+      content:
+        "The trainer backend runs on FastAPI. The trainer uses PostgreSQL.\n" +
+        "Deploy the trainer with docker-compose on the server.",
+    });
+
+    const r = result as { path: string };
+    const content = await readFile(r.path);
+    expect(content).toMatch(/^entities:/m);
+    expect(content).toContain("- trainer");
+    expect(content).toContain("- postgresql");
+    expect(content).toContain("- fastapi");
+  });
+
+  it("respects explicit entities and does not overwrite them", async () => {
+    const result = await handleBrainCreateNote({
+      path: "projects/explicit.md",
+      frontmatter: { entities: ["custom-term"] },
+      content: "Some body about docker that appears many times docker docker.",
+    });
+
+    const r = result as { path: string };
+    const content = await readFile(r.path);
+    expect(content).toContain("- custom-term");
+    expect(content).not.toContain("- docker");
   });
 });

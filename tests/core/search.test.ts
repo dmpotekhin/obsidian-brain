@@ -65,4 +65,26 @@ describe("SearchIndex", () => {
     expect(results.length).toBeLessThanOrEqual(1);
     index.close();
   });
+
+  it("finds a note by entity word absent from its body", async () => {
+    await atomicWrite(
+      join(brainDir(), "notes", "entity-recall-test.md"),
+      `---
+title: Entity Recall Test
+entities:
+  - zerba-unicorn
+---
+# Body without the magic word
+
+This note talks about regular things and never mentions unicorns.`,
+    );
+
+    const index = new SearchIndex();
+    index.open();
+    index.reindex();
+    const results = index.search("zerba-unicorn");
+    expect(results.length).toBeGreaterThanOrEqual(1);
+    expect(results[0]!.title).toContain("Entity Recall Test");
+    index.close();
+  });
 });

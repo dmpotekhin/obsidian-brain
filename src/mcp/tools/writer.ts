@@ -4,6 +4,7 @@ import { appendLogEvent } from "../../core/log";
 import { join, resolve, relative, normalize } from "node:path";
 import { brainDir, atomicWrite, fileExists, vaultRoot } from "../../core/vault";
 import { writeFrontmatter } from "../../core/frontmatter";
+import { extractEntities } from "../../core/entities";
 import { mkdirSync, readFileSync } from "node:fs";
 
 export async function handleBrainFeedback(
@@ -168,6 +169,14 @@ export async function handleBrainCreateNote(
   // Security: refuse clobbering existing files
   if (fileExists(targetPath)) {
     throw new Error(`File already exists: ${relPath}`);
+  }
+
+  // Auto-generate entities (ai-memory style) unless explicitly provided
+  if (!Array.isArray(frontmatter["entities"])) {
+    frontmatter["entities"] = extractEntities(
+      content,
+      (frontmatter["title"] as string) ?? "",
+    );
   }
 
   // Create the note

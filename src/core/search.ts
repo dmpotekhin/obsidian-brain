@@ -55,12 +55,18 @@ export class SearchIndex {
       }
       const kind = (data["kind"] as string) ?? "note";
 
+      // Append entities to the indexed content so FTS recall matches
+      // entity words even when they never appear in the body.
+      const entities = Array.isArray(data["entities"])
+        ? (data["entities"] as string[]).join(" ")
+        : "";
+
       // Store body in the files table so the FTS external content index can read it
       this.db
         .prepare(
           `INSERT OR REPLACE INTO files (path, title, content, kind, mtime) VALUES (?, ?, ?, ?, ?)`
         )
-        .run(filePath, title, body, kind, Date.now());
+        .run(filePath, title, entities ? `${body} ${entities}` : body, kind, Date.now());
     } catch {
       // Skip unparseable files
     }
@@ -70,6 +76,13 @@ export class SearchIndex {
     if (!this.db) throw new Error("Index not open");
 
     try {
+      // FTS5 parses "a-b" as `a NOT b`, which breaks hyphenated queries.
+      // Wrap bare hyphenated terms in quotes so they match as a phrase.
+      const ftsQuery =
+        query.includes("-") && !query.includes('"') && !query.includes(" ")
+          ? `"${query}"`
+          : query;
+
       const stmt = this.db.prepare(`
         SELECT f.path, f.title,
                snippet(files_fts, 1, '<mark>', '</mark>', '...', 40) as snippet,
@@ -81,7 +94,7 @@ export class SearchIndex {
         LIMIT ?
       `);
 
-      const rows = stmt.all(query, limit) as Array<{
+      const rows = stmt.all(ftsQuery, limit) as Array<{
         path: string;
         title: string;
         snippet: string;
