@@ -84,7 +84,7 @@ export function buildToolTable(): Map<string, ToolDefinition> {
 
   tools.set("brain_context", {
     name: "brain_context",
-    description: "Read current active context — all confirmed and quarantined preferences.",
+    description: "Read active context (confirmed rules) plus recent journal activity.",
     inputSchema: { type: "object", properties: {}, required: [] },
     handler: handleBrainContext,
   });

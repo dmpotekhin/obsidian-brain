@@ -7,10 +7,12 @@ import {
   countViolated,
 } from "../../src/core/evidence";
 import { appendLogEvent } from "../../src/core/log";
+import { resetVaultRoot } from "../../src/core/vault";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");
 
 beforeAll(() => {
+  resetVaultRoot();
   process.env.BRAIN_VAULT = TEST_VAULT;
   mkdirSync(join(TEST_VAULT, "Brain", "log"), { recursive: true });
   mkdirSync(join(TEST_VAULT, "Brain", "preferences"), { recursive: true });

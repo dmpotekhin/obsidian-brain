@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { handleBrainDevlog } from "../../src/mcp/tools/writer";
-import { brainDir } from "../../src/core/vault";
+import { brainDir, resetVaultRoot } from "../../src/core/vault";
 import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -10,6 +10,7 @@ function tempVault() {
   const brainPath = join(dir, "Brain");
   mkdirSync(brainPath, { recursive: true });
   // Override vault root for test
+  resetVaultRoot();
   process.env["BRAIN_VAULT"] = dir;
   return dir;
 }

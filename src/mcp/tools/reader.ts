@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { brainDir, readFile, fileExists } from "../../core/vault";
 import { regenerateActive } from "../../core/active";
+import { getRecentJournalEntries } from "../../core/journal";
 
 export async function handleBrainContext(): Promise<unknown> {
   const activePath = join(brainDir(), "active.md");
@@ -8,7 +9,8 @@ export async function handleBrainContext(): Promise<unknown> {
     await regenerateActive();
   }
   const content = await readFile(activePath);
-  return { content };
+  const recentActivity = await getRecentJournalEntries(5);
+  return { content, recent_activity: recentActivity };
 }
 
 export async function handleBrainContextPack(

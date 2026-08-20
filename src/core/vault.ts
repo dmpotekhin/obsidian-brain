@@ -5,6 +5,10 @@ import { randomUUID } from "node:crypto";
 
 let vaultRootCache: string | null = null;
 
+export function resetVaultRoot(): void {
+  vaultRootCache = null;
+}
+
 export function vaultRoot(): string {
   if (vaultRootCache) return vaultRootCache;
   const env = process.env["BRAIN_VAULT"];

@@ -4,11 +4,12 @@ import { join } from "node:path";
 import { handleBrainDream } from "../../src/mcp/tools/lifecycle";
 import { handleBrainApplyEvidence } from "../../src/mcp/tools/writer";
 import { writePreference } from "../../src/core/preference";
-import { atomicWrite } from "../../src/core/vault";
+import { atomicWrite, resetVaultRoot } from "../../src/core/vault";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");
 
 beforeAll(async () => {
+  resetVaultRoot();
   process.env.BRAIN_VAULT = TEST_VAULT;
   mkdirSync(join(TEST_VAULT, "Brain"), { recursive: true });
   mkdirSync(join(TEST_VAULT, "Brain", "inbox"), { recursive: true });

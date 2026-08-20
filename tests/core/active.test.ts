@@ -2,12 +2,13 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { regenerateActive } from "../../src/core/active";
-import { readFile } from "../../src/core/vault";
+import { readFile, resetVaultRoot } from "../../src/core/vault";
 import { writePreference } from "../../src/core/preference";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");
 
 beforeAll(() => {
+  resetVaultRoot();
   process.env.BRAIN_VAULT = TEST_VAULT;
   mkdirSync(join(TEST_VAULT, "Brain", "preferences"), { recursive: true });
 });

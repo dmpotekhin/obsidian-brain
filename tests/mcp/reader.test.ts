@@ -2,12 +2,15 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { handleBrainContext, handleBrainContextPack } from "../../src/mcp/tools/reader";
+import { handleBrainDevlog } from "../../src/mcp/tools/writer";
 import { writePreference } from "../../src/core/preference";
 import { regenerateActive } from "../../src/core/active";
+import { resetVaultRoot } from "../../src/core/vault";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");
 
 beforeAll(async () => {
+  resetVaultRoot();
   process.env.BRAIN_VAULT = TEST_VAULT;
   mkdirSync(join(TEST_VAULT, "Brain", "preferences"), { recursive: true });
 
@@ -54,6 +57,20 @@ describe("handleBrainContext", () => {
     const r = result as { content: string };
     expect(r.content).toContain("Rule 1");
     expect(r.content).toContain("confirmed");
+  });
+
+  it("includes recent journal activity as handoff", async () => {
+    await handleBrainDevlog({ entry: "Handoff test entry", project: "brain" });
+    const result = await handleBrainContext();
+    const r = result as {
+      content: string;
+      recent_activity: Array<{ time: string; project?: string; entry: string }>;
+    };
+    expect(r).toHaveProperty("recent_activity");
+    expect(Array.isArray(r.recent_activity)).toBe(true);
+    expect(
+      r.recent_activity.some(e => e.entry === "Handoff test entry"),
+    ).toBe(true);
   });
 });
 

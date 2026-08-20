@@ -2,10 +2,12 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { buildToolTable } from "../../src/mcp/tools";
+import { resetVaultRoot } from "../../src/core/vault";
 
 const TEST_VAULT = join(import.meta.dir, "../../fixtures/test-vault");
 
 beforeAll(() => {
+  resetVaultRoot();
   process.env.BRAIN_VAULT = TEST_VAULT;
   mkdirSync(join(TEST_VAULT, "Brain", "inbox"), { recursive: true });
   mkdirSync(join(TEST_VAULT, "Brain", "log"), { recursive: true });
